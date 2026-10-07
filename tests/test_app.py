@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-# AWS Lambda supplies boto3. This small stub lets the pure unit tests run offline.
+# AWS Lambda supplies boto3. This small stub lets the pure unit tests run offline. 
 if "boto3" not in sys.modules:
     class FakeClientError(Exception):
         def __init__(self, error_response, operation_name):
