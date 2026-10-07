@@ -1,0 +1,37 @@
+{
+  "createVpcRequest": {
+    "clientRequestId": "allianz-demo-001",
+    "name": "allianz-demo",
+    "vpcCidr": "10.50.0.0/16",
+    "subnets": [
+      {
+        "name": "app-a",
+        "cidr": "10.50.1.0/24",
+        "availabilityZone": "ap-south-1a",
+        "tier": "private"
+      },
+      {
+        "name": "app-b",
+        "cidr": "10.50.2.0/24",
+        "availabilityZone": "ap-south-1b",
+        "tier": "private"
+      }
+    ]
+  },
+  "successResponseShape": {
+    "requestId": "allianz-demo-001",
+    "status": "SUCCEEDED",
+    "resources": {
+      "vpcId": "vpc-0123456789abcdef0",
+      "subnets": [
+        {
+          "subnetId": "subnet-0123456789abcdef0",
+          "name": "app-a",
+          "cidr": "10.50.1.0/24",
+          "availabilityZone": "ap-south-1a",
+          "tier": "private"
+        }
+      ]
+    }
+  }
+}
