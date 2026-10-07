@@ -1,6 +1,6 @@
 {
   "createVpcRequest": {
-    "clientRequestId": "allianz-demo-001",
+    "clientRequestId": "allianz-demo-001", 
     "name": "allianz-demo",
     "vpcCidr": "10.50.0.0/16",
     "subnets": [
