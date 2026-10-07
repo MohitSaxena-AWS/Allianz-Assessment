@@ -1,0 +1,8 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "allianz-vpc-api"
+resolve_s3 = true
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+region = "ap-south-1"

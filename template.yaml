@@ -1,0 +1,139 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Cognito-protected serverless API that creates VPCs and multiple subnets.
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: allianz-vpc-api
+    Description: Prefix used in resource names and tags.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 90
+    MemorySize: 256
+    Tracing: Active
+    Environment:
+      Variables:
+        LOG_LEVEL: INFO
+
+Resources:
+  VpcApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "${ProjectName}-api"
+      StageName: Prod
+      TracingEnabled: true
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt ApiUserPool.Arn
+
+  VpcRequestsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${ProjectName}-requests"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: requestId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: requestId
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  VpcManagerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ProjectName}-manager"
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Description: Creates VPCs and subnets, then persists the provisioning result.
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref VpcRequestsTable
+          PROJECT_NAME: !Ref ProjectName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref VpcRequestsTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ec2:CreateVpc
+                - ec2:CreateSubnet
+                - ec2:CreateTags
+                - ec2:DeleteSubnet
+                - ec2:DeleteVpc
+                - ec2:DescribeAvailabilityZones
+                - ec2:DescribeVpcs
+              Resource: "*"
+      Events:
+        CreateVpc:
+          Type: Api
+          Properties:
+            RestApiId: !Ref VpcApi
+            Path: /vpcs
+            Method: post
+        ListVpcs:
+          Type: Api
+          Properties:
+            RestApiId: !Ref VpcApi
+            Path: /vpcs
+            Method: get
+        GetVpc:
+          Type: Api
+          Properties:
+            RestApiId: !Ref VpcApi
+            Path: /vpcs/{requestId}
+            Method: get
+
+  ApiUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "${ProjectName}-users"
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 7
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+
+  ApiUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "${ProjectName}-client"
+      UserPoolId: !Ref ApiUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+
+Outputs:
+  ApiUrl:
+    Description: API base URL. Supply a Cognito ID token in the Authorization header.
+    Value: !Sub "https://${VpcApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+  UserPoolId:
+    Description: Cognito user pool used by the API authorizer.
+    Value: !Ref ApiUserPool
+  UserPoolClientId:
+    Description: Cognito app client ID used to obtain ID tokens.
+    Value: !Ref ApiUserPoolClient
+  RequestsTableName:
+    Description: DynamoDB table containing provisioning records.
+    Value: !Ref VpcRequestsTable

@@ -1,0 +1,27 @@
+# The unit test suite uses only Python's built-in unittest module.
+# boto3 is supplied by the AWS Lambda Python runtime.
+AWS challenge
+
+Objective: Create an API based on AWS services that can create a VPC with multiple subnets and store the results. We need to be able to retrieve the data of created resources from the API. The code should be written in Python. The API should be protected with an authentication layer. Authorization should be open to all authenticated users. 
+
+Preferable in Python.
+Minimize the use of AI – use for syntax and use documentation.
+Should have good understanding of code and logic provided
+Document the code well
+Should be ready to make changes on code on fly.
+Update the code to github
+ 
+
+Outcome: Document the exercise (code, config files, README) in a GitHub (or similar) repository and share it with us at least one day before the demo.
+
+Bonus: Automate the setup as much as possible using AWS serverless services.
+
+This test is designed to evaluate your individual skills and capabilities, and therefore it is mandatory that you complete it independently. Please note the following instructions carefully:
+
+Do not seek assistance from anyone while attempting the assessment.
+Do not use search engines, online platforms, or any external tools/resources.
+Ensure you complete the assessment within the given timeline (within 2 days).
+Your responses should reflect your own knowledge and problem-solving ability.
+ 
+
+Note :- Make sure your code is clean, self-explanatory, and easily maintainable, so that any changes requested by the global team during the interview can be implemented confidently without using AI.
