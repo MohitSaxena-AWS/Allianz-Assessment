@@ -1,4 +1,4 @@
-"""AWS Lambda handler for the VPC provisioning interview exercise."""
+"""AWS Lambda handler for the VPC provisioning interview exercise. """
 
 import base64
 import ipaddress
